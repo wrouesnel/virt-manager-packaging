@@ -9,7 +9,7 @@ publishes them to the Launchpad PPA
 
 ```bash
 sudo add-apt-repository ppa:w-rouesnel/virt-manager
-sudo apt install virt-manager
+sudo apt install virt-manager-ext
 ```
 
 ## Target releases

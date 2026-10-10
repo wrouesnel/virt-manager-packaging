@@ -1,4 +1,4 @@
-Source: virt-manager
+Source: virt-manager-ext
 Section: admin
 Priority: optional
 Maintainer: @MAINTAINER@
@@ -28,7 +28,7 @@ Build-Depends:
  python3-pytest <!nocheck>,
  python3-requests <!nocheck>,
 
-Package: virt-manager
+Package: virt-manager-ext
 Architecture: all
 Depends:
  gir1.2-gtk-3.0 (>= 3.22),
@@ -40,7 +40,7 @@ Depends:
  python3-gi (>= 3.31.3~),
  python3-gi-cairo,
  python3-libvirt (>= 0.7.1),
- virtinst (= ${binary:Version}),
+ virtinst-ext (= ${binary:Version}),
  ${misc:Depends},
  ${python3:Depends},
 Recommends:
@@ -54,7 +54,9 @@ Suggests:
  python3-guestfs,
  ssh-askpass,
  virt-viewer,
-Conflicts: virt-manager (<< 1:5.0.0),
+Provides: virt-manager (= ${binary:Version}),
+Replaces: virt-manager,
+Conflicts: virt-manager,
 Description: desktop application for managing virtual machines (wrouesnel build)
  The virt-manager application is a desktop user interface for managing virtual
  machines through libvirt. It primarily targets KVM VMs, but also manages Xen
@@ -64,7 +66,7 @@ Description: desktop application for managing virtual machines (wrouesnel build)
  This build from https://github.com/wrouesnel/virt-manager carries patches
  for serial console terminal resize propagation and other improvements.
 
-Package: virtinst
+Package: virtinst-ext
 Architecture: all
 Depends:
  e2fsprogs,
@@ -82,7 +84,9 @@ Recommends:
  virt-viewer,
 Suggests:
  python3-argcomplete,
-Conflicts: virtinst (<< 1:5.0.0),
+Provides: virtinst (= ${binary:Version}),
+Replaces: virtinst,
+Conflicts: virtinst,
 Description: utilities to create and edit virtual machines (wrouesnel build)
  This package contains some command line utilities to create and edit virtual
  machines:

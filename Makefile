@@ -41,8 +41,8 @@ deb-source: images
 test: $(addprefix test-,$(DEB_SERIES))
 
 $(addprefix test-,$(DEB_SERIES)): test-%:
-	$(RUN) $(image_$*) scripts/rebuild-deb.sh $(call latest,out/deb-source/$*/virt-manager_*.dsc) $*
-	$(RUN) $(image_$*) scripts/test-install.sh $(call latest,out/deb/$*/virt-manager_*_all.deb)
+	$(RUN) $(image_$*) scripts/rebuild-deb.sh $(call latest,out/deb-source/$*/virt-manager-ext_*.dsc) $*
+	$(RUN) $(image_$*) scripts/test-install.sh $(call latest,out/deb/$*/virt-manager-ext_*_all.deb)
 
 clean:
 	rm -rf out work
