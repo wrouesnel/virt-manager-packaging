@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Builds the Debian source packages (for the Launchpad PPA) from the virt-manager fork, one per Ubuntu series:
-# out/deb-source/<series>/virt-manager_<version>-<release>~<series>1{.dsc,.debian.tar.xz,_source.changes}
+# out/deb-source/<series>/virt-manager_<epoch>:<version>-<release>~<series>1{.dsc,.debian.tar.xz,_source.changes}
 # and the orig tarball.
 # Usage: build-deb-source.sh <series>...
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 source "$ROOT/upstream.env"
-shift 0  # no archive argument, unlike podman-desktop
 
 [ $# -gt 0 ] || { echo "no Ubuntu series given" >&2; exit 1; }
 : "${PKG_MAINTAINER:?PKG_MAINTAINER must be set (Name <email>)}"
@@ -21,21 +20,18 @@ git clone --quiet --filter=blob:none "$VM_REPO" "$SRC"
 git -C "$SRC" checkout --quiet "$VM_REF"
 COMMIT=$(git -C "$SRC" rev-parse --short HEAD)
 
-read -r version release < <("$ROOT/scripts/pkg-version.sh" "$SRC")
-
-# strip debian-unfriendly characters from the directory name: replace ~ with .
-orig_version=${version//\~/.}
+read -r epoch version release orig_version < <("$ROOT/scripts/pkg-version.sh" "$SRC")
 orig_dir=virt-manager-$orig_version
 
-# create the orig tarball from the checked-out source
+# create the orig tarball from the checked-out source (no epoch in filename)
 ORIG=$OUT/virt-manager_$version.orig.tar.gz
-(cd "$SRC/.." && mv src "$orig_dir" && \
+(cd "$WORK" && rm -rf "$orig_dir" && cp -a src "$orig_dir" && \
  tar --sort=name --owner=0 --group=0 --numeric-owner \
    --exclude=.git -czf "$ORIG" "$orig_dir" && \
- mv "$orig_dir" src)
+ rm -rf "$orig_dir")
 
 for series in "$@"; do
-  debversion="$version-$release~${series}1"
+  debversion="$epoch:$version-$release~${series}1"
   dir=$OUT/deb-source/$series
   rm -rf "$dir"
   mkdir -p "$dir"
