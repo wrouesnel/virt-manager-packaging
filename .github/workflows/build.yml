@@ -1,0 +1,102 @@
+name: Build packages
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      vm_ref:
+        description: 'virt-manager fork ref to build (default: VM_REF of upstream.env)'
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  PPA: ${{ vars.PPA || 'ppa:w-rouesnel/virt-manager' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      PKG_MAINTAINER: ${{ vars.PKG_MAINTAINER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Override VM_REF if requested
+        if: inputs.vm_ref
+        run: sed -i "s|^VM_REF=.*|VM_REF=${{ inputs.vm_ref }}|" upstream.env
+
+      - name: Build the source packages
+        run: make deb-source
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            out/deb-source/
+
+  test:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [noble, resolute]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: out
+
+      - name: Rebuild from source package, install and test (${{ matrix.target }})
+        run: make test-${{ matrix.target }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: out
+
+      - name: Install publishing tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends devscripts dput
+
+      - name: Import the signing key
+        env:
+          PACKAGE_SIGNING_KEY: ${{ secrets.PACKAGE_SIGNING_KEY }}
+          PACKAGE_SIGNING_KEY_PASSPHRASE: ${{ secrets.PACKAGE_SIGNING_KEY_PASSPHRASE }}
+          FPR: ${{ vars.PACKAGE_SIGNING_KEY_FINGERPRINT }}
+        run: |
+          [ -n "$PACKAGE_SIGNING_KEY" ] && [ -n "$FPR" ] ||
+            { echo "::error::PACKAGE_SIGNING_KEY or PACKAGE_SIGNING_KEY_FINGERPRINT is not set"; exit 1; }
+          gpg --batch --pinentry-mode loopback --passphrase-fd 3 --import \
+            <<<"$PACKAGE_SIGNING_KEY" 3< <(printf '%s' "$PACKAGE_SIGNING_KEY_PASSPHRASE")
+          gpg --list-secret-keys "$FPR" >/dev/null
+          echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+          for grip in $(gpg --with-keygrip --with-colons -K "$FPR" | awk -F: '/^grp/ {print $10}'); do
+            /usr/lib/gnupg/gpg-preset-passphrase --preset "$grip" < <(printf '%s' "$PACKAGE_SIGNING_KEY_PASSPHRASE")
+          done
+          echo "SIGNING_KEY=$FPR" >> "$GITHUB_ENV"
+
+      - name: Upload source packages to ${{ env.PPA }}
+        run: |
+          for changes in out/deb-source/*/*_source.changes; do
+            debsign --no-re-sign -k"$SIGNING_KEY" "$changes"
+            gpg --verify "$changes"
+            dput "$PPA" "$changes"
+          done

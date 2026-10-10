@@ -1,0 +1,17 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: virt-manager
+Source: https://github.com/wrouesnel/virt-manager
+Comment: This is a fork of https://github.com/virt-manager/virt-manager carrying
+ patches for serial console terminal resize propagation and other improvements.
+
+Files: *
+Copyright: 2006-2026 Red Hat, Inc. and the virt-manager contributors
+License: GPL-2+
+ On Debian systems, the full text of the GNU General Public License version 2
+ can be found in /usr/share/common-licenses/GPL-2.
+
+Files: debian/*
+Copyright: 2026 Will Rouesnel
+License: GPL-2+
+ On Debian systems, the full text of the GNU General Public License version 2
+ can be found in /usr/share/common-licenses/GPL-2.

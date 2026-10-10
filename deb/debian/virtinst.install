@@ -1,0 +1,9 @@
+usr/bin/virt-clone
+usr/bin/virt-install
+usr/bin/virt-xml
+usr/share/bash-completion/completions/
+usr/share/locale/
+usr/share/man/man1/virt-clone.1
+usr/share/man/man1/virt-install.1
+usr/share/man/man1/virt-xml.1
+usr/share/virt-manager/virtinst

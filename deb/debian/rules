@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+# Builds virt-manager 5.x from source using meson.
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure --buildsystem=meson -- \
+		-Dupdate-icon-cache=false \
+		-Dcompile-schemas=false \
+		-Dtests=disabled
+
+override_dh_auto_test:
+
+override_dh_python3:
+	dh_python3 usr/share/virt-manager
+
+override_dh_installdocs:
+	dh_installdocs --all NEWS.md

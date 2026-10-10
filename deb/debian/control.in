@@ -1,0 +1,98 @@
+Source: virt-manager
+Section: admin
+Priority: optional
+Maintainer: @MAINTAINER@
+Standards-Version: 4.7.0
+Homepage: https://github.com/wrouesnel/virt-manager
+Vcs-Browser: https://github.com/wrouesnel/virt-manager-packaging
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ meson (>= 0.63.0),
+ gettext,
+ python3,
+ python3-docutils,
+ python3-setuptools,
+# for the tests
+ cpio <!nocheck>,
+ xorriso <!nocheck>,
+ gir1.2-libosinfo-1.0 <!nocheck>,
+ gir1.2-libvirt-glib-1.0 <!nocheck>,
+ libglib2.0-bin <!nocheck>,
+ libvirt-daemon <!nocheck>,
+ locales-all <!nocheck>,
+ python3-argcomplete <!nocheck>,
+ python3-gi (>= 3.31.3~) <!nocheck>,
+ python3-libvirt <!nocheck>,
+ python3-libxml2 <!nocheck>,
+ python3-pytest <!nocheck>,
+ python3-requests <!nocheck>,
+
+Package: virt-manager
+Architecture: all
+Depends:
+ gir1.2-gtk-3.0 (>= 3.22),
+ gir1.2-gtk-vnc-2.0,
+ gir1.2-gtksource-4,
+ gir1.2-libosinfo-1.0,
+ gir1.2-libvirt-glib-1.0,
+ gir1.2-vte-2.91,
+ python3-gi (>= 3.31.3~),
+ python3-gi-cairo,
+ python3-libvirt (>= 0.7.1),
+ virtinst (= ${binary:Version}),
+ ${misc:Depends},
+ ${python3:Depends},
+Recommends:
+ gir1.2-ayatanaappindicator3-0.1 | gir1.2-appindicator3-0.1,
+ gir1.2-spiceclientglib-2.0,
+ gir1.2-spiceclientgtk-3.0,
+ libvirt-daemon-system (>= 1.2.7),
+Suggests:
+ gir1.2-secret-1,
+ gnome-keyring,
+ python3-guestfs,
+ ssh-askpass,
+ virt-viewer,
+Conflicts: virt-manager (<< 1:5.0.0),
+Description: desktop application for managing virtual machines (wrouesnel build)
+ The virt-manager application is a desktop user interface for managing virtual
+ machines through libvirt. It primarily targets KVM VMs, but also manages Xen
+ and LXC (Linux containers). Common operations for any libvirt driver should
+ work.
+ .
+ This build from https://github.com/wrouesnel/virt-manager carries patches
+ for serial console terminal resize propagation and other improvements.
+
+Package: virtinst
+Architecture: all
+Depends:
+ e2fsprogs,
+ xorriso,
+ gir1.2-libosinfo-1.0,
+ python3-gi (>= 3.31.3~),
+ python3-libvirt (>= 0.4.6),
+ python3-libxml2,
+ python3-requests,
+ ${misc:Depends},
+ ${python3:Depends},
+Recommends:
+ libvirt-clients,
+ qemu-utils,
+ virt-viewer,
+Suggests:
+ python3-argcomplete,
+Conflicts: virtinst (<< 1:5.0.0),
+Description: utilities to create and edit virtual machines (wrouesnel build)
+ This package contains some command line utilities to create and edit virtual
+ machines:
+ .
+  - virt-clone: cloning existing inactive guests; it copies the disk images,
+    and defines a config with new name, UUID and MAC address pointing to the
+    copied disks
+  - virt-install: provision operating systems into new virtual machines
+  - virt-xml: easily edit libvirt domain XML using virt-install's command line
+    options
+ .
+ This build from https://github.com/wrouesnel/virt-manager carries the
+ latest upstream version with additional patches.
